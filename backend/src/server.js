@@ -1,6 +1,6 @@
+import 'dotenv/config'; // ES module way to load dotenv
 import app from './app.js'; // Notice the .js extension!
 import connectDB from './config/db.js';
-import dotenv from 'dotenv'
 
 const PORT = process.env.PORT || 5000;
 
