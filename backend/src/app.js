@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 
@@ -10,7 +11,8 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '150mb' }));
+app.use(cookieParser());
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'success', message: 'SecureShare API is running' });
@@ -22,5 +24,8 @@ app.use('/api/auth', authRoutes);
 
 import fileRoutes from './routes/fileRoutes.js';
 app.use('/api/files', fileRoutes);
+
+import shareRoutes from './routes/shareRoutes.js';
+app.use('/api/share', shareRoutes);
 
 export default app;

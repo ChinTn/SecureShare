@@ -1,45 +1,58 @@
 import mongoose, { mongo } from "mongoose";
 
 const userSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true,
+    name: 
+    { 
+        type: String, 
+        required: true, 
+        trim: true 
     },
-    email: {
-        type: String,
-        required: true,
-        unique: true, //no two users can have the same email
+    email: 
+    { 
+        type: String, 
+        required: true, 
+        unique: true, 
+        lowercase: true 
     },
-    isVerified: {
-        type: Boolean,
-        default: false, // Users start out unverified
-    },
-    verificationToken: {
-        type: String, // We will store a crypto string here
-    },
-    password: {
-        type: String, //it will be bcrypt-hashed password
-        required: true,
-    },
-    publicKey: {
-        type: String,
-        required: true, //user's RSA public key normaly stored
-    },
-    privateKey: {
-        type: String,
-        required: true, //user's RSA private key - must be encrypted before saving 
-    },
-    salt: { 
+    password: 
+    { 
         type: String, 
         required: true 
+    },// bcrypt hash only
+    publicKey: 
+    { 
+        type: String, 
+        required: true 
+    },// RSA public key, plaintext
+    encryptedPrivateKey: 
+    { 
+        type: String, 
+        required: true ,
+        //IV_base64 : AuthTag_base64 : EncryptedKey_base64
+    },// RSA private key encrypted with PBKDF2
+    pbkdf2Salt: 
+    { 
+        type: String, 
+        required: true 
+    },// salt for PBKDF2 derivation
+    storageUsed: 
+    { 
+        type: Number, 
+        default: 0 
+    },// bytes
+    verificationToken: 
+    { 
+        type: String 
     },
-    storageUsed: {
-        type: Number,
-        default: 0,// tracks how many bytes of storage a user has consumed
+    isVerified: 
+    { 
+        type: Boolean, 
+        default: false 
     },
-    createdAt: {
-        type: Date,
-        default: Date.now,
+    createdAt: 
+    { 
+        type: Date, 
+        default: Date.now 
     }
 });
 
