@@ -2,6 +2,7 @@ import File from '../models/File.model.js';
 import { encryptFile } from '../services/encryptionService.js';
 import cloudinary from '../config/cloudinary.js';
 import { PassThrough } from 'stream';
+import AuditLog from '../models/AuditLog.model.js';
 
 export const uploadFile = async (req, res) => {
     try {
@@ -67,6 +68,14 @@ export const uploadFile = async (req, res) => {
         user.storageUsed += size;
         await user.save();
 
+        // 6. Create an Audit Log entry for the Upload
+        await AuditLog.create({
+            user: user._id,
+            file: newFile._id,
+            action: 'UPLOAD',
+            details: `File size: ${size} bytes`
+        });
+        
         res.status(201).json({
             message: 'File encrypted and uploaded successfully',
             file: {
