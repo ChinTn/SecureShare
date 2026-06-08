@@ -28,4 +28,7 @@ app.use('/api/files', fileRoutes);
 import shareRoutes from './routes/shareRoutes.js';
 app.use('/api/share', shareRoutes);
 
+import auditRoutes from './routes/auditRoutes.js';
+app.use('/api/audit', auditRoutes);
+
 export default app;
