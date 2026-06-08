@@ -19,7 +19,7 @@ const auditLogSchema = new mongoose.Schema({
     // What exactly did they do?
     action: { 
         type: String, 
-        enum: ['REGISTER', 'LOGIN', 'LOGOUT', 'UPLOAD', 'DOWNLOAD', 'SHARE', 'DELETE', 'REVOKE_SHARE', 'FILE_UPLOAD', 'FILE_DOWNLOAD', 'FILE_DELETE', 'FAILED_LOGIN', 'INTEGRITY_FAIL'],
+        enum: ['REGISTER', 'LOGIN', 'LOGOUT', 'SHARE', 'REVOKE_SHARE', 'FILE_UPLOAD', 'FILE_DOWNLOAD', 'FILE_DELETE', 'FAILED_LOGIN', 'INTEGRITY_FAIL'],
         required: true 
     },
     // Any extra details (like "Shared with bob@email.com")

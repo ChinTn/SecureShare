@@ -96,6 +96,16 @@ export const downloadSharedFile = async (req, res) => {
             details: `Share link accessed. Downloads: ${share.downloadCount}/${share.downloadLimit}`
         });
 
+        if (share.receiver) {
+            await AuditLog.create({
+                user: share.receiver,
+                file: share.file._id,
+                shareToken: share.shareToken,
+                action: 'FILE_DOWNLOAD',
+                details: `You downloaded a file shared by someone else.`
+            });
+        }
+
         res.status(200).json({
             encryptedData,
             encryptedAESKeyForReceiver: share.encryptedAESKeyForReceiver,

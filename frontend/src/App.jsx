@@ -9,6 +9,7 @@ import UnlockVault from './pages/UnlockVault';
 import SharedWithMe from './pages/SharedWithMe';
 import AuditLogs from './pages/AuditLogs';
 import Settings from './pages/Settings';
+import ToastContainer from './components/ToastContainer';
 
 // Smarter Private Route Logic
 const PrivateRoute = ({ children }) => {
@@ -33,6 +34,7 @@ function App() {
     return (
         <AuthProvider>
             <Router>
+                <ToastContainer />
                 <Routes>
                     <Route path="/register" element={<Register />} />
                     <Route path="/login" element={<Login />} />

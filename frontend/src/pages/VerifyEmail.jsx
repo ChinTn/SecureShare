@@ -31,7 +31,7 @@ const VerifyEmail = () => {
     }, [token]);
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="min-h-screen flex items-center justify-center p-4 animate-fade-in">
             <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl w-full max-w-md shadow-2xl text-center">
                 <h2 className="text-3xl font-bold mb-6 text-white">Email Verification</h2>
                 

@@ -36,40 +36,67 @@ const UnlockVault = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center font-sans p-4 text-white" style={{ background: 'radial-gradient(circle at 50% -20%, #312e81 0%, #0f172a 50%)', backgroundColor: '#0f172a' }}>
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 p-10 rounded-3xl shadow-2xl w-full max-w-md text-center relative z-10">
-                <div className="w-20 h-20 mx-auto bg-violet-500/30 rounded-full flex items-center justify-center mb-6">
-                    <svg className="w-10 h-10 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                </div>
-                
-                <h2 className="text-3xl font-bold text-white mb-2">Vault Locked</h2>
-                <p className="text-gray-300 mb-8">Welcome back, <span className="font-mono text-violet-300">{user?.name || 'User'}</span>. Enter your Master Password to decrypt your vault into memory.</p>
-
-                {error && <div className="bg-red-500/20 border border-red-500/50 text-red-200 p-3 rounded-lg mb-6 text-sm">{error}</div>}
-
-                <form onSubmit={handleUnlock} className="space-y-6">
-                    <div>
-                        <input
-                            type="password"
-                            placeholder="Master Password"
-                            className="w-full bg-black/40 border border-white/20 p-4 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
+        <div className="min-h-screen flex bg-white dark:bg-[#1a1a1a] transition-colors duration-300 animate-fade-in">
+            {/* Left Side: Form */}
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 relative z-10">
+                <div className="w-full max-w-md space-y-10 text-center">
+                    <div className="w-24 h-24 mx-auto bg-orange-100 dark:bg-orange-500/10 rounded-full flex items-center justify-center mb-2 shadow-inner">
+                        <svg className="w-12 h-12 text-orange-600 dark:text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
                     </div>
-                    <button 
-                        type="submit" 
-                        disabled={loading}
-                        className="w-full bg-violet-600 hover:bg-violet-500 text-white font-bold py-4 rounded-xl transition-all disabled:opacity-50"
-                    >
-                        {loading ? 'Decrypting Vault...' : 'Unlock Vault'}
-                    </button>
-                </form>
+                    
+                    <div>
+                        <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight uppercase">Vault Locked</h2>
+                        <p className="mt-4 text-gray-500 dark:text-gray-400 font-medium">
+                            Welcome back, <span className="font-mono font-bold text-orange-600 dark:text-orange-400">{user?.name || 'User'}</span>.<br/>Enter your Master Password to decrypt your vault into memory.
+                        </p>
+                    </div>
 
-                <button onClick={logout} className="mt-8 text-sm text-gray-400 hover:text-red-400 transition-colors relative z-20">
-                    Not you? Logout completely
-                </button>
+                    {error && (
+                        <div className="p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-lg text-red-700 dark:text-red-400 text-sm font-semibold tracking-wide text-left">
+                            {error}
+                        </div>
+                    )}
+
+                    <form onSubmit={handleUnlock} className="space-y-6">
+                        <div>
+                            <input
+                                type="password"
+                                placeholder="Master Password"
+                                className="w-full bg-gray-50 dark:bg-[#252525] border border-gray-300 dark:border-white/10 rounded-xl p-4 text-center text-xl tracking-widest text-gray-900 dark:text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-medium"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <button 
+                            type="submit" 
+                            disabled={loading}
+                            className="w-full py-4 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 disabled:dark:bg-gray-700 disabled:opacity-50 text-white font-extrabold uppercase tracking-widest rounded-xl transition-all shadow-md shadow-orange-500/20"
+                        >
+                            {loading ? 'Decrypting Vault...' : 'Unlock Vault'}
+                        </button>
+                    </form>
+
+                    <button 
+                        onClick={() => { logout(); navigate('/login'); }}
+                        className="mt-8 text-xs uppercase tracking-widest font-bold text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                    >
+                        Not you? Logout completely
+                    </button>
+                </div>
+            </div>
+
+            {/* Right Side: Image/Branding */}
+            <div className="hidden lg:flex w-1/2 bg-gray-50 dark:bg-[#0f172a] border-l border-gray-200 dark:border-white/5 items-center justify-center p-12 overflow-hidden relative">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-orange-500/10 dark:bg-orange-500/5 rounded-full blur-3xl mix-blend-multiply dark:mix-blend-screen pointer-events-none"></div>
+                
+                <img 
+                    src="https://imgs.search.brave.com/kfWGnzGve6hMmT6QS97qm5zfliJqkmVN3NY84TiNGIc/rs:fit:0:180:1:0/g:ce/aHR0cHM6Ly93d3cu/cHVyZXN0b3JhZ2Uu/Y29tL2NvbnRlbnQv/ZGFtL3B1cmVzdG9y/YWdlL2tub3dsZWRn/ZS93aGF0LWlzLWZp/bGUtbGV2ZWwtZW5j/cnlwdGlvbi1oZXJv/LmpwZy5pbWdvLmpw/Zw" 
+                    alt="Vault Security Vector" 
+                    className="w-full max-w-lg object-contain relative z-10 filter drop-shadow-2xl dark:opacity-90 mix-blend-darken dark:mix-blend-normal rounded-2xl"
+                />
             </div>
         </div>
     );
