@@ -235,3 +235,37 @@ export const calculateIntegrityHash = async (fileBuffer) => {
     //padStart makes 5 to 05
 };
 
+/**
+ * ZERO-KNOWLEDGE SHARING LOGIC:
+ * Unlocks the file's AES key using Alice's Private Key, then immediately
+ * locks it again using Bob's Public Key.
+ */
+export const reEncryptAESKeyForRecipient = async (encryptedAESKeyB64, myPrivateKey, recipientPublicKeyJwkStr) => {
+    // 1. Decrypt the AES key using MY private key
+    const encryptedAESKeyBuffer = base64ToBuffer(encryptedAESKeyB64);
+    const rawAesKeyBuffer = await window.crypto.subtle.decrypt(
+        { name: "RSA-OAEP" },
+        myPrivateKey,
+        encryptedAESKeyBuffer
+    );
+
+    // 2. Import BOB'S public key
+    const recipientPublicKeyJwk = JSON.parse(recipientPublicKeyJwkStr);
+    const recipientPublicKey = await window.crypto.subtle.importKey(
+        "jwk",
+        recipientPublicKeyJwk,
+        { name: "RSA-OAEP", hash: "SHA-256" },
+        true,
+        ["encrypt"]
+    );
+
+    // 3. Encrypt the raw AES key using BOB'S public key
+    const newEncryptedKeyBuffer = await window.crypto.subtle.encrypt(
+        { name: "RSA-OAEP" },
+        recipientPublicKey,
+        rawAesKeyBuffer
+    );
+
+    return bufferToBase64(newEncryptedKeyBuffer);
+};
+

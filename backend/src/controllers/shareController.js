@@ -57,7 +57,7 @@ export const createShare = async (req, res) => {
         await AuditLog.create({
             user: req.user._id,
             file: fileId,
-            action: 'SHARE_CREATE',
+            action: 'SHARE',
             details: `Created share link for receiver: ${receiverEmail || 'Public'}`
         });
 
@@ -92,7 +92,7 @@ export const downloadSharedFile = async (req, res) => {
             user: share.sender,
             file: share.file._id,
             shareToken: share.shareToken,
-            action: 'SHARE_DOWNLOAD',
+            action: 'FILE_DOWNLOAD',
             details: `Share link accessed. Downloads: ${share.downloadCount}/${share.downloadLimit}`
         });
 
@@ -146,7 +146,7 @@ export const revokeShare = async (req, res) => {
             user: req.user._id,
             file: share.file,
             shareToken: share.shareToken,
-            action: 'SHARE_REVOKE',
+            action: 'REVOKE_SHARE',
             details: 'Share link manually revoked by sender'
         });
 

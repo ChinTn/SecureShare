@@ -40,3 +40,20 @@ export const getAuditLogs = async (req, res) => {
         res.status(500).json({ message: "Server error fetching audit logs" });
     }
 };
+
+//INTEGRITY_FAIL is detected entirely in the browser (Zero-Knowledge!), the backend doesn't know it happened unless the frontend tells it! File:
+export const reportIntegrityFail = async (req, res) => {
+    try {
+        const { fileId, details } = req.body;
+        await AuditLog.create({
+            user: req.user._id,
+            file: fileId,
+            action: 'INTEGRITY_FAIL',
+            details: details || 'File failed cryptographic hash verification',
+            ipAddress: req.ip
+        });
+        res.status(200).json({ message: "Logged" });
+    } catch (error) {
+        res.status(500).json({ message: "Error logging integrity fail" });
+    }
+};

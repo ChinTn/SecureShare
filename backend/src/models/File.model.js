@@ -17,6 +17,7 @@ const fileSchema = new mongoose.Schema({
     encryptedAESKey: { type: String, required: true }, 
     iv: { type: String, required: true }, 
     authTag: { type: String, required: true }, 
+    integrityHash: { type: String, required: true },
     
     uploadDate: { type: Date, default: Date.now },
     isDeleted: { type: Boolean, default: false } // Soft delete

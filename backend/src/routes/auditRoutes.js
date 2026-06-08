@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAuditLogs } from '../controllers/auditController.js';
+import { getAuditLogs, reportIntegrityFail} from '../controllers/auditController.js';
 import { protectRoute } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();

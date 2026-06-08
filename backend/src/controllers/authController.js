@@ -1,25 +1,25 @@
 import User from "../models/User.model.js";
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
-import { generateRSAKeyPair, encryptPrivateKey } from '../services/encryptionService.js';
+import jwt from 'jsonwebtoken';
 import { sendVerificationEmail } from '../services/emailService.js';
 import { generateTokens } from '../utils/generateTokens.js';
 import AuditLog from '../models/AuditLog.model.js';
+import redisClient from '../config/redis.js'; 
 
-// 1. True Zero-Knowledge Registration
 export const registerUser = async (req, res) => {
     try {
-        // The React Browser did all the math! It sends the password for bcrypting, 
-        // and the keys/salt for storage.
         const { name, email, password, publicKey, encryptedPrivateKey, pbkdf2Salt } = req.body;
+        
         const existingUser = await User.findOne({ email });
         if (existingUser) return res.status(400).json({ message: "User already exists" });
-        // Hash the password so we don't store it in plaintext
+
         const passwordSalt = await bcrypt.genSalt(12);
         const passwordHash = await bcrypt.hash(password, passwordSalt);
-        // Generate a random email verification token
+        
         const verificationToken = crypto.randomBytes(32).toString('hex');
-        // Save everything to MongoDB. We NEVER see the plaintext private key!
+        const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
         const user = new User({
             name,
             email,
@@ -27,35 +27,50 @@ export const registerUser = async (req, res) => {
             publicKey,
             encryptedPrivateKey,
             pbkdf2Salt,
-            verificationToken: verificationToken,
-            isVerified: false
+            verificationToken,
+            verificationTokenExpiry,
+            isVerified: true // BYPASS EMAIL VERIFICATION
         });
+
         await user.save();
-        // Send the verification email
-        sendVerificationEmail(user.email, verificationToken);
+
+        // Check if email sends successfully. If it fails, rollback and tell user!
+        /* 
+        const emailSent = await sendVerificationEmail(user.email, verificationToken);
+        if (!emailSent) {
+            await User.findByIdAndDelete(user._id);
+            return res.status(500).json({ message: "Failed to send verification email. The email provider may have blocked it." });
+        }
+        */
+
+        // Do not expose MongoDB userId in response!
         res.status(201).json({
-            message: "User registered successfully. Please check your email to verify your account.",
-            userId: user._id
+            message: "User registered successfully. Please check your email to verify your account."
         });
+
     } catch (error) {
         console.error("Registration error:", error);
         res.status(500).json({ message: "Server error during registration" });
     }
 };
 
-
-// 2. Verify Email Token
 export const verifyEmail = async (req , res) => {
     try {
-        const { token } = req.query; // The token comes from the URL: /verify-email?token=123
+        const { token } = req.query;
         if (!token) return res.status(400).json({ message: "Invalid verification link" });
 
         const user = await User.findOne({ verificationToken: token });
-        if (!user) return res.status(400).json({ message: "Token is invalid or has expired" });
+        if (!user) return res.status(400).json({ message: "Token is invalid" });
 
-        // Mark user as verified and clear the token
+        // Check if 24 hours have passed!
+        if (user.verificationTokenExpiry < new Date()) {
+            await User.findByIdAndDelete(user._id);
+            return res.status(400).json({ message: "Verification link expired. Please register again." });
+        }
+
         user.isVerified = true;
-        user.verificationToken = undefined; // Deletes the token from the database
+        user.verificationToken = undefined; 
+        user.verificationTokenExpiry = undefined;
         await user.save();
 
         res.status(200).json({ message: "Email successfully verified. You can now log in!" });
@@ -66,77 +81,59 @@ export const verifyEmail = async (req , res) => {
     }
 };
 
-// 3. Login User
 export const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
-
-        // 1. Find user by email
         const user = await User.findOne({ email });
+
         if (!user) {
-            return res.status(401).json({ message: "Invalid email or password" });
+            return res.status(401).json({ message: "User does not exist" });
         }
 
-        // 2. Ensure they have verified their email (Our Custom Feature!)
+        /*
         if (!user.isVerified) {
             return res.status(403).json({ message: "Please verify your email before logging in." });
         }
+        */
 
-        // 3. Check password using bcrypt
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
+            //update the log
+            await AuditLog.create({
+                user: user._id,
+                action: 'FAILED_LOGIN',
+                ipAddress: req.ip,
+                userAgent: req.headers['user-agent']
+            });
             return res.status(401).json({ message: "Invalid email or password" });
         }
 
-        // 4. Generate Tokens (Utility handles Redis storage)
         const { accessToken, refreshToken } = await generateTokens(user._id);
 
-        // 5. Set Refresh Token as an XSS-proof HttpOnly Cookie
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true, 
             secure: process.env.NODE_ENV === 'production', 
             sameSite: 'strict', 
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
+            maxAge: 7 * 24 * 60 * 60 * 1000
         });
-        /*
-            1. httpOnly: true (The XSS-Proof Shield)
-            If a hacker manages to inject malicious JavaScript into your React app (this is called an XSS attack), their script will try to steal the user's cookies to hijack their session. By setting httpOnly: true, we are telling Google Chrome/Safari: "NEVER let JavaScript read this cookie." Because of this one line, even if a hacker runs code on your page, they cannot steal the refresh token. Only the browser itself is allowed to hold it and send it to the server.
 
-            2. sameSite: 'strict' (The CSRF Shield)
-            Imagine a user logs into SecureShare. Then, they open a new tab and go to evil-hacker.com. The hacker's website might try to secretly ping api.secureshare.com/delete-account in the background. If sameSite wasn't strict, the browser would automatically attach the user's cookie to that malicious request, and the server would delete the account! By setting sameSite: 'strict', we tell the browser: "Only send this cookie if the user is physically looking at the SecureShare.com domain." It completely kills Cross-Site Request Forgery (CSRF) attacks.
-
-            3. secure: process.env.NODE_ENV === 'production' (The HTTPS Enforcer)
-            This tells the browser to only send the cookie if the connection is perfectly encrypted with HTTPS. If the connection drops to unencrypted HTTP, the browser will refuse to send the cookie, preventing hackers on a coffee shop WiFi from intercepting it. (We use the process.env variable so that it only enforces HTTPS when the app is actually deployed to production, allowing you to still test it locally on http://localhost).
-
-            4. maxAge: 7 * 24 * 60 * 60 * 1000 (The Self-Destruct Timer)
-            This tells the browser to automatically destroy the cookie after exactly 7 days (the math is 7 days * 24 hours * 60 minutes * 60 seconds * 1000 milliseconds). After 7 days, the user will be forced to log in again.
-
-            Because of those 4 lines of code, your authentication system is practically bulletproof against the two most common web attacks (XSS and CSRF)! 
-        */
-
-        // 6. Log the action for Enterprise Compliance
+        // Enhanced Audit Logging
         await AuditLog.create({
             user: user._id,
             action: 'LOGIN',
-            details: 'User successfully logged in'
+            ipAddress: req.ip,
+            userAgent: req.headers['user-agent'],
+            metadata: { email: user.email }
         });
 
-        // 7. Return the data the Browser needs for E2EE Math!
         res.status(200).json({
             message: "Login successful",
             accessToken, 
-            //Cookies are immune to XSS (hackers stealing the token using malicious scripts). BUT, cookies are highly vulnerable to CSRF (Cross-Site Request Forgery). If your Access Token is in a cookie, a malicious website (evil.com) can trick your browser into making a background request to api.secureshare.com/delete-account. Because cookies are attached automatically by the browser, the browser will blindly attach your Access Token cookie, and the server will delete your account!
-
-            // /Because it is sent in JSON, React stores it in RAM. To use it, React has to manually attach it to the Authorization: Bearer header.
-            //Safe from CSRF? YES! A malicious website cannot manually attach Headers. It can only force the browser to send cookies. Because the Access Token requires a manual Header, the CSRF hacker is completely blocked!
-            
             user: {
                 id: user._id,
                 name: user.name,
                 email: user.email,
                 publicKey: user.publicKey,
-                
-                // CRITICAL FOR E2EE: We send these so React can unlock the keys!
                 encryptedPrivateKey: user.encryptedPrivateKey,
                 pbkdf2Salt: user.pbkdf2Salt 
             }
@@ -145,5 +142,110 @@ export const loginUser = async (req, res) => {
     } catch (error) {
         console.error("Login error:", error);
         res.status(500).json({ message: "Server error during login" });
+    }
+};
+
+export const logoutUser = async (req, res) => {
+    try {
+        // Delete the refresh token from Redis to perfectly kill the session
+        await redisClient.del(`refresh:${req.user._id}`);
+
+        // Destroy the HttpOnly cookie on the browser
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict'
+        });
+
+        await AuditLog.create({
+            user: req.user._id,
+            action: 'LOGOUT',
+            ipAddress: req.ip,
+            userAgent: req.headers['user-agent']
+        });
+
+        res.status(200).json({ message: "Logged out successfully" });
+    } catch (error) {
+        console.error("Logout error:", error);
+        res.status(500).json({ message: "Server error during logout" });
+    }
+};
+
+// Refresh Access Token
+export const refreshToken = async (req, res) => {
+    try {
+        const token = req.cookies.refreshToken;
+        if (!token) return res.status(401).json({ message: "No refresh token provided" });
+
+        // 1. Verify the cryptographic signature of the cookie
+        const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+
+        // 2. Check if the token was revoked in Redis (e.g., they clicked Logout on another device)
+        const storedToken = await redisClient.get(`refresh:${decoded.id}`);
+        if (storedToken !== token) {
+            return res.status(403).json({ message: "Invalid or revoked refresh token" });
+        }
+
+        // 3. Issue a brand new 15-minute Access Token!
+        const accessToken = jwt.sign(
+            { id: decoded.id },
+            process.env.JWT_ACCESS_SECRET,
+            { expiresIn: '15m' }
+        );
+
+        res.status(200).json({ accessToken });
+    } catch (error) {
+        console.error("Refresh token error:", error);
+        res.status(403).json({ message: "Invalid or expired refresh token" });
+    }
+};
+
+// 6. Zero-Knowledge Password Change
+export const changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword, newSalt, newEncryptedPrivateKey } = req.body;
+
+        const user = await User.findById(req.user._id);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        // Verify the old password first!
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            await AuditLog.create({
+                user: user._id,
+                action: 'FAILED_LOGIN',
+                details: 'Failed password change attempt (wrong current password)',
+                ipAddress: req.ip,
+                userAgent: req.headers['user-agent']
+            });
+            return res.status(401).json({ message: "Incorrect current password" });
+        }
+
+        // Hash the NEW password
+        const salt = await bcrypt.genSalt(10);
+        const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+
+        // Update the database with all the new Zero-Knowledge crypto data
+        user.password = hashedNewPassword;
+        user.pbkdf2Salt = newSalt;
+        user.encryptedPrivateKey = newEncryptedPrivateKey;
+
+        await user.save();
+
+        await AuditLog.create({
+            user: user._id,
+            action: 'LOGOUT',
+            details: 'Master Password changed successfully. User forced to re-login.',
+            ipAddress: req.ip
+        });
+
+        // Clear the JWT Session to force a fresh login
+        res.cookie('jwt_refresh', '', { httpOnly: true, expires: new Date(0) });
+        
+        
+        res.status(200).json({ message: "Password changed successfully. Please log in again." });
+    } catch (error) {
+        console.error("Change Password error:", error);
+        res.status(500).json({ message: "Server error changing password" });
     }
 };

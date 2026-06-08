@@ -10,21 +10,31 @@ const auditLogSchema = new mongoose.Schema({
         ref: 'User', 
         required: true 
     },
-    // What file was involved?
+    // What file was involved? (Optional, since login/register don't have files)
     file: { 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'File', 
-        required: true 
+        required: false 
     },
     // What exactly did they do?
     action: { 
         type: String, 
-        enum: ['UPLOAD', 'DOWNLOAD', 'SHARE', 'DELETE', 'REVOKE_SHARE'],
+        enum: ['REGISTER', 'LOGIN', 'LOGOUT', 'UPLOAD', 'DOWNLOAD', 'SHARE', 'DELETE', 'REVOKE_SHARE', 'FILE_UPLOAD', 'FILE_DOWNLOAD', 'FILE_DELETE', 'FAILED_LOGIN', 'INTEGRITY_FAIL'],
         required: true 
     },
     // Any extra details (like "Shared with bob@email.com")
     details: { 
         type: String 
+    },
+    // SECURITY TRACING FIELDS
+    ipAddress: { 
+        type: String 
+    },
+    userAgent: { 
+        type: String 
+    },
+    metadata: { 
+        type: mongoose.Schema.Types.Mixed 
     },
     // Exact timestamp for compliance
     timestamp: { 
