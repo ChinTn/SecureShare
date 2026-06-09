@@ -13,7 +13,7 @@ const AuditLogs = () => {
     useEffect(() => {
         const fetchLogs = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/audit?limit=10');
+                const res = await axios.get('/api/audit?limit=10');
                 setLogs(res.data.logs);
             } catch (err) {
                 console.error(err);

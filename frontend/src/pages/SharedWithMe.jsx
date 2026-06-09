@@ -32,7 +32,7 @@ const SharedHub = () => {
     const fetchReceivedShares = async () => {
         try {
             setLoading(true);
-            const res = await axios.get('http://localhost:5000/api/share/shared-with-me');
+            const res = await axios.get('/api/share/shared-with-me');
             setReceivedShares(res.data.shares || []);
         } catch (error) {
             console.error("Failed to fetch received shares", error);
@@ -44,7 +44,7 @@ const SharedHub = () => {
     const fetchSentShares = async () => {
         try {
             setLoading(true);
-            const res = await axios.get('http://localhost:5000/api/share/my-shares');
+            const res = await axios.get('/api/share/my-shares');
             setSentShares(res.data.shares || []);
         } catch (error) {
             console.error("Failed to fetch sent shares", error);
@@ -58,7 +58,7 @@ const SharedHub = () => {
         try {
             setStatusMessage(`Fetching shared blob for ${share.file.originalName}...`);
             
-            const res = await axios.get(`http://localhost:5000/api/share/${share.shareToken}`);
+            const res = await axios.get(`/api/share/${share.shareToken}`);
             const { encryptedData, encryptedAESKeyForReceiver, iv, authTag, integrityHash, mimeType, originalName } = res.data;
 
             setStatusMessage(`Decrypting Bob-specific padlock...`);
@@ -74,7 +74,7 @@ const SharedHub = () => {
             const newHash = await calculateIntegrityHash(decryptedBuffer);
             if (newHash !== integrityHash) {
                 //send to the backend so it can log it
-                await axios.post('http://localhost:5000/api/audit/integrity', { 
+                await axios.post('/api/audit/integrity', { 
                     fileId: share.file._id,
                     details: `Tampered file detected: ${share.file.originalName}`
                 });
@@ -110,7 +110,7 @@ const SharedHub = () => {
         
         try {
             setStatusMessage('Revoking access...');
-            await axios.delete(`http://localhost:5000/api/share/${shareToken}`);
+            await axios.delete(`/api/share/${shareToken}`);
             
             // Update the UI
             setSentShares(sentShares.map(share => 

@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
 
                     try {
                         // 1. Ask the backend for a new access token using our HTTP-Only cookie!
-                        const res = await axios.get('http://localhost:5000/api/auth/refresh', { withCredentials: true });
+                        const res = await axios.get('/api/auth/refresh', { withCredentials: true });
                         const newAccessToken = res.data.accessToken;
 
                         // 2. Globally update Axios to use the new token for all future requests
@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }) => {
     // 4. Logout Helper
     const logout = async () => {
         try {
-            await axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true });
+            await axios.post('/api/auth/logout', {}, { withCredentials: true });
         } catch (error) {
             console.error("Logout failed on server", error);
         } finally {

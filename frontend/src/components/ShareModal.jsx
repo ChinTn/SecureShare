@@ -21,7 +21,7 @@ const ShareModal = ({ file, onClose }) => {
 
         try {
             // 1. Fetch Bob's Public Key from the server
-            const pkRes = await axios.get(`http://localhost:5000/api/share/public-key?email=${encodeURIComponent(receiverEmail)}`);
+            const pkRes = await axios.get(`/api/share/public-key?email=${encodeURIComponent(receiverEmail)}`);
             const bobPublicKeyJwkStr = pkRes.data.publicKey;
 
             // 2. Perform the Zero-Knowledge Re-Encryption
@@ -35,7 +35,7 @@ const ShareModal = ({ file, onClose }) => {
             );
 
             // 3. Send the Bob-specific padlock to the server to create the link
-            const shareRes = await axios.post('http://localhost:5000/api/share', {
+            const shareRes = await axios.post('/api/share', {
                 fileId: file._id,
                 receiverEmail,
                 encryptedAESKeyForReceiver,

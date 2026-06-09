@@ -55,7 +55,7 @@ const Settings = () => {
             setStatusMessage('Sending secured payload to the server...');
 
             // 4. Send the payload to the backend
-            await axios.post('http://localhost:5000/api/auth/change-password', {
+            await axios.post('/api/auth/change-password', {
                 currentPassword,
                 newPassword,
                 newSalt: newSaltBase64,

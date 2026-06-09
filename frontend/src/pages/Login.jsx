@@ -21,7 +21,7 @@ const Login = () => {
 
         try {
             // 1. Fetch the locked vault from the server
-            const response = await axios.post('http://localhost:5000/api/auth/login', {
+            const response = await axios.post('/api/auth/login', {
                 email: formData.email,
                 password: formData.password
             });

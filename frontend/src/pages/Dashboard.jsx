@@ -39,7 +39,7 @@ const Dashboard = () => {
   const fetchFiles = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5000/api/files");
+      const res = await axios.get("/api/files");
       setFiles(res.data.files || []);
     } catch (error) {
       console.error("Failed to fetch files", error);
@@ -95,7 +95,7 @@ const Dashboard = () => {
         size: file.size,
       };
 
-      await axios.post("http://localhost:5000/api/files/upload", payload);
+      await axios.post("/api/files/upload", payload);
 
       setUploadProgress(100);
       setStatusMessage("Upload complete!");
@@ -120,7 +120,7 @@ const Dashboard = () => {
       );
 
       const res = await axios.get(
-        `http://localhost:5000/api/files/download/${file._id}`,
+        `/api/files/download/${file._id}`,
       );
       const {
         encryptedData,
@@ -144,7 +144,7 @@ const Dashboard = () => {
       const newHash = await calculateIntegrityHash(decryptedBuffer);
       if (newHash !== integrityHash) {
         //Integrity issue logged in AuditLog
-        await axios.post('http://localhost:5000/api/audit/integrity', { 
+        await axios.post('/api/audit/integrity', { 
                     fileId: file._id,
                     details: `Tampered file detected: ${file.originalName}`
                 });
@@ -181,7 +181,7 @@ const Dashboard = () => {
     if (!deleteConfirmId) return;
     const id = deleteConfirmId;
     try {
-      await axios.delete(`http://localhost:5000/api/files/${id}`);
+      await axios.delete(`/api/files/${id}`);
       setFiles(files.filter((f) => f._id !== id));
       toast.success("File securely deleted");
     } catch (error) {
