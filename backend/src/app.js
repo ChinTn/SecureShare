@@ -5,6 +5,9 @@ import cookieParser from 'cookie-parser';
 
 const app = express();
 
+// Trust reverse proxy (like Render/Vercel) to get real client IPs
+app.set('trust proxy', 1);
+
 app.use(helmet());
 app.use(cors({
   origin: [process.env.CLIENT_URL, 'http://localhost:5174', 'http://localhost:5173'],
