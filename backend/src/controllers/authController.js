@@ -90,22 +90,46 @@ export const loginUser = async (req, res) => {
             return res.status(401).json({ message: "User does not exist" });
         }
 
-        /*
-        if (!user.isVerified) {
-            return res.status(403).json({ message: "Please verify your email before logging in." });
+        // 1. Check if account is locked
+        if (user.lockUntil && user.lockUntil > Date.now()) {
+            const minutesLeft = Math.ceil((user.lockUntil - Date.now()) / (1000 * 60));
+            return res.status(403).json({ 
+                message: `Account is temporarily locked due to too many failed attempts. Try again in ${minutesLeft} minute(s).` 
+            });
         }
-        */
 
         const isMatch = await bcrypt.compare(password, user.password);
+        
         if (!isMatch) {
-            //update the log
+            // Increment failed attempts
+            user.failedLoginAttempts += 1;
+            let errorMessage = "Invalid email or password";
+
+            // If they hit 5 attempts, lock the account for 15 minutes
+            if (user.failedLoginAttempts >= 5) {
+                user.lockUntil = Date.now() + 15 * 60 * 1000; // 15 minutes
+                errorMessage = "Too many failed attempts. Account locked for 15 minutes.";
+            }
+
+            await user.save();
+
+            // Update the log
             await AuditLog.create({
                 user: user._id,
                 action: 'FAILED_LOGIN',
                 ipAddress: req.ip,
-                userAgent: req.headers['user-agent']
+                userAgent: req.headers['user-agent'],
+                details: `Failed attempt ${user.failedLoginAttempts}/5`
             });
-            return res.status(401).json({ message: "Invalid email or password" });
+
+            return res.status(401).json({ message: errorMessage });
+        }
+
+        // Password is correct, reset the counters!
+        if (user.failedLoginAttempts > 0 || user.lockUntil) {
+            user.failedLoginAttempts = 0;
+            user.lockUntil = undefined;
+            await user.save();
         }
 
         const { accessToken, refreshToken } = await generateTokens(user._id);

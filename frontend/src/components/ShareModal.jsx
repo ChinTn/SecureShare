@@ -43,7 +43,7 @@ const ShareModal = ({ file, onClose }) => {
                 downloadLimit: Number(downloadLimit)
             });
 
-            setShareLink(`http://localhost:5174${shareRes.data.shareLink}`);
+            setShareLink(`${window.location.origin}${shareRes.data.shareLink}`);
         } catch (err) {
             console.error("Share error:", err);
             setError(err.response?.data?.message || 'Failed to share file. Make sure the user exists.');

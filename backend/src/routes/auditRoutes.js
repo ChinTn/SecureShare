@@ -8,4 +8,7 @@ const router = express.Router();
 // Query params supported: ?page=1&limit=20&action=FILE_UPLOAD
 router.get('/', protectRoute, getAuditLogs);
 
+// Route: POST /api/audit/integrity
+router.post('/integrity', protectRoute, reportIntegrityFail);
+
 export default router;

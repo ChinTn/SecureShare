@@ -75,10 +75,11 @@ const SharedHub = () => {
             if (newHash !== integrityHash) {
                 //send to the backend so it can log it
                 await axios.post('http://localhost:5000/api/audit/integrity', { 
-                    fileId: share ? share.file._id : file._id,
-                    details: `Tampered file detected: ${share ? share.file.originalName : file.originalName}`
+                    fileId: share.file._id,
+                    details: `Tampered file detected: ${share.file.originalName}`
                 });
                 toast.error("WARNING: File integrity check failed! The file may have been corrupted or tampered with.");
+                setStatusMessage('');
                 return;
             }
 

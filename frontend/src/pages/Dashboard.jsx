@@ -145,12 +145,13 @@ const Dashboard = () => {
       if (newHash !== integrityHash) {
         //Integrity issue logged in AuditLog
         await axios.post('http://localhost:5000/api/audit/integrity', { 
-                    fileId: share ? share.file._id : file._id,
-                    details: `Tampered file detected: ${share ? share.file.originalName : file.originalName}`
+                    fileId: file._id,
+                    details: `Tampered file detected: ${file.originalName}`
                 });
         toast.error(
           "WARNING: File integrity check failed! The file may have been corrupted or tampered with. Check console for hashes.",
         );
+        setStatusMessage("");
         return;
       }
 

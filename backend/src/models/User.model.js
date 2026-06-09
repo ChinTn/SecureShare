@@ -52,6 +52,13 @@ const userSchema = new mongoose.Schema({
     verificationTokenExpiry: { 
         type: Date 
     },
+    failedLoginAttempts: {
+        type: Number,
+        default: 0
+    },
+    lockUntil: {
+        type: Date
+    },
     createdAt: 
     { 
         type: Date, 
