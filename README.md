@@ -6,7 +6,7 @@
 
 **The server is mathematically incapable of reading your files.**
 
-[View Demo](#) · [Report Bug](https://github.com/ChinTn/SecureShare/issues) · [Request Feature](https://github.com/ChinTn/SecureShare/issues)
+[View Demo](https://secure-share-woad.vercel.app/) · [Report Bug](https://github.com/ChinTn/SecureShare/issues) · [Request Feature](https://github.com/ChinTn/SecureShare/issues)
 
 </div>
 
