@@ -50,23 +50,23 @@ const AuditLogs = () => {
     };
 
     return (
-        <div className="min-h-screen p-8 pb-20 transition-colors duration-300 animate-fade-in">
+        <div className="min-h-screen p-4 sm:p-8 pb-20 transition-colors duration-300 animate-fade-in">
             <div className="max-w-6xl mx-auto space-y-8 relative z-10">
                 
                 {/* Navigation & Header */}
-                <div className="flex justify-between items-center bg-white dark:bg-[#252525] border border-gray-200 dark:border-white/10 p-6 rounded-2xl shadow-sm transition-colors">
-                    <div className="flex items-center gap-6">
-                        <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white uppercase">
+                <div className="flex flex-col xl:flex-row justify-between items-center bg-white dark:bg-[#252525] border border-gray-200 dark:border-white/10 p-6 rounded-2xl shadow-sm transition-colors gap-6 xl:gap-0">
+                    <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 w-full xl:w-auto">
+                        <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white uppercase text-center md:text-left">
                             Secure<span className="text-orange-500">Share</span>
                         </h1>
-                        <nav className="flex gap-4 text-sm font-semibold tracking-wide uppercase">
+                        <nav className="flex flex-wrap justify-center gap-4 text-sm font-semibold tracking-wide uppercase">
                             <Link to="/dashboard" className="text-gray-500 dark:text-gray-400 hover:text-orange-500 transition-colors">My Vault</Link>
                             <Link to="/shared" className="text-gray-500 dark:text-gray-400 hover:text-orange-500 transition-colors">Shared Hub</Link>
                             <span className="text-gray-900 dark:text-white border-b-2 border-orange-500 pb-1">Security Logs</span>
                             <Link to="/settings" className="text-gray-500 dark:text-gray-400 hover:text-orange-500 transition-colors">Settings</Link>
                         </nav>
                     </div>
-                    <div className="flex items-center gap-6">
+                    <div className="flex flex-col sm:flex-row items-center gap-6 w-full xl:w-auto justify-center">
                         {/* Theme Toggle Button */}
                         <button onClick={toggleTheme} className="p-2 text-gray-500 dark:text-gray-400 hover:text-orange-500 transition-colors">
                             {theme === 'dark' ? (

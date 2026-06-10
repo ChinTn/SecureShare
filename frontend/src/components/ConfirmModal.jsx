@@ -5,7 +5,7 @@ const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, confirmText
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 dark:bg-black/60 backdrop-blur-sm p-4 font-sans transition-colors duration-300 animate-fade-in">
-            <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 p-8 rounded-3xl w-full max-w-sm shadow-2xl relative transition-colors text-center">
+            <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 p-6 sm:p-8 rounded-3xl w-[95%] sm:max-w-md shadow-2xl relative transition-colors text-center">
                 
                 <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4 border ${isDangerous ? 'bg-red-50 dark:bg-red-500/10 border-red-100 dark:border-red-500/20 text-red-600 dark:text-red-500' : 'bg-orange-50 dark:bg-orange-500/10 border-orange-100 dark:border-orange-500/20 text-orange-600 dark:text-orange-500'}`}>
                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -198,7 +198,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="p-8 pb-20 animate-fade-in">
+    <div className="p-4 sm:p-8 pb-20 animate-fade-in">
       {/* Render Share Modal if Open */}
       {isShareModalOpen && fileToShare && (
         <ShareModal
@@ -223,12 +223,12 @@ const Dashboard = () => {
       <div className="max-w-6xl mx-auto space-y-8 relative z-10">
         
         {/* Navigation & Header */}
-        <div className="flex justify-between items-center bg-white dark:bg-[#252525] border border-gray-200 dark:border-white/10 p-6 rounded-2xl shadow-sm transition-colors">
-          <div className="flex items-center gap-6">
-            <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white uppercase">
+        <div className="flex flex-col xl:flex-row justify-between items-center bg-white dark:bg-[#252525] border border-gray-200 dark:border-white/10 p-6 rounded-2xl shadow-sm transition-colors gap-6 xl:gap-0">
+          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 w-full xl:w-auto">
+            <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white uppercase text-center md:text-left">
               Secure<span className="text-orange-500">Share</span>
             </h1>
-            <nav className="flex gap-4 text-sm font-semibold tracking-wide uppercase">
+            <nav className="flex flex-wrap justify-center gap-4 text-sm font-semibold tracking-wide uppercase">
               <span className="text-gray-900 dark:text-white border-b-2 border-orange-500 pb-1">
                 My Vault
               </span>
@@ -252,7 +252,7 @@ const Dashboard = () => {
               </Link>
             </nav>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-col sm:flex-row items-center gap-6 w-full xl:w-auto justify-center">
             {/* Theme Toggle Button */}
             <button onClick={toggleTheme} className="p-2 text-gray-500 dark:text-gray-400 hover:text-orange-500 transition-colors">
                 {theme === 'dark' ? (
@@ -280,7 +280,7 @@ const Dashboard = () => {
         </div>
 
         {/* Upload Zone */}
-        <div className="bg-gray-50 dark:bg-[#252525] border-2 border-dashed border-gray-300 dark:border-white/20 p-16 rounded-2xl text-center relative overflow-hidden group hover:border-orange-500 transition-colors">
+        <div className="bg-gray-50 dark:bg-[#252525] border-2 border-dashed border-gray-300 dark:border-white/20 p-8 md:p-16 rounded-2xl text-center relative overflow-hidden group hover:border-orange-500 transition-colors">
           <input
             type="file"
             onChange={handleFileUpload}
@@ -349,74 +349,45 @@ const Dashboard = () => {
               <p className="text-gray-500 dark:text-gray-400 font-medium">Your vault is entirely empty.</p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-200 dark:divide-white/10">
-              {files.map((file) => (
-                <div
-                  key={file._id}
-                  className="p-6 flex flex-col sm:flex-row items-center justify-between hover:bg-gray-50 dark:hover:bg-white/5 transition-colors gap-6 sm:gap-0"
-                >
-                  <div className="flex items-center gap-5 w-full sm:w-auto">
-                    <div className="w-12 h-12 bg-gray-100 dark:bg-white/5 rounded-xl flex items-center justify-center shrink-0 border border-gray-200 dark:border-white/10">
-                      <svg
-                        className="w-6 h-6 text-gray-600 dark:text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        ></path>
-                      </svg>
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="font-bold text-gray-900 dark:text-white truncate">{file.originalName}</h4>
-                      <div className="flex items-center gap-3 mt-1">
-                        <span className="text-xs font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded">
-                          {(file.size / 1024 / 1024).toFixed(2)} MB
-                        </span>
-                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                          {new Date(file.uploadDate).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-3 w-full sm:w-auto shrink-0 justify-end">
-                    <button
-                      onClick={() => openShareModal(file)}
-                      className="px-5 py-2.5 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-900 dark:text-white text-sm font-bold tracking-wide uppercase rounded-lg transition-colors border border-gray-200 dark:border-white/10"
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse min-w-[700px]">
+                <thead>
+                  <tr className="bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
+                    <th className="p-6 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">File Name</th>
+                    <th className="p-6 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Size</th>
+                    <th className="p-6 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Date</th>
+                    <th className="p-6 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-white/10">
+                  {files.map((file) => (
+                    <tr
+                      key={file._id}
+                      className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                     >
-                      Share
-                    </button>
-                    <button
-                      onClick={() => handleDownload(file)}
-                      className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold tracking-wide uppercase rounded-lg transition-colors shadow-sm"
-                    >
-                      Decrypt & Download
-                    </button>
-                    <button
-                      onClick={() => setDeleteConfirmId(file._id)}
-                      className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-100 dark:hover:border-red-500/20"
-                    >
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        ></path>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              ))}
+                      <td className="p-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-gray-100 dark:bg-white/5 rounded-lg flex items-center justify-center shrink-0 border border-gray-200 dark:border-white/10">
+                            <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                          </div>
+                          <span className="font-bold text-gray-900 dark:text-white">{file.originalName}</span>
+                        </div>
+                      </td>
+                      <td className="p-6 font-mono text-sm text-gray-500 dark:text-gray-400">{(file.size / 1024 / 1024).toFixed(2)} MB</td>
+                      <td className="p-6 text-sm text-gray-500 dark:text-gray-400">{new Date(file.uploadDate).toLocaleDateString()}</td>
+                      <td className="p-6 text-right">
+                        <div className="flex gap-2 justify-end">
+                          <button onClick={() => openShareModal(file)} className="px-4 py-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-900 dark:text-white text-xs font-bold uppercase rounded-lg transition-colors">Share</button>
+                          <button onClick={() => handleDownload(file)} className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold uppercase rounded-lg transition-colors">Decrypt</button>
+                          <button onClick={() => setDeleteConfirmId(file._id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
